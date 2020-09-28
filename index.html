@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>0rder 5ummary</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+  <header class="header_class">Order Summary VeggiesEmpire</header>
+  <input type="file" id="fileUpload" />
+  <input type="button" id="upload" value="Upload" onclick="UploadProcess()" />
+  <br />
+  <div id="ExcelTable"></div>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/xlsx.full.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/jszip.js"></script>
+  <script type="text/javascript">
+    function UploadProcess() {
+      //Reference the FileUpload element.
+      var fileUpload = document.getElementById("fileUpload");
+      //Validate whether File is valid Excel file.
+      var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
+      if (regex.test(fileUpload.value.toLowerCase())) {
+        if (typeof (FileReader) != "undefined") {
+          var reader = new FileReader();
+          //For Browsers other than IE.
+          if (reader.readAsBinaryString) {
+            reader.onload = function (e) {
+              GetTableFromExcel(e.target.result);
+            };
+            reader.readAsBinaryString(fileUpload.files[0]);
+          } else {
+            //For IE Browser.
+            reader.onload = function (e) {
+              var data = "";
+              var bytes = new Uint8Array(e.target.result);
+              for (var i = 0; i < bytes.byteLength; i++) {
+                data += String.fromCharCode(bytes[i]);
+              }
+              GetTableFromExcel(data);
+            };
+            reader.readAsArrayBuffer(fileUpload.files[0]);
+          }
+        } else {
+          alert("This browser does not support HTML5.");
+        }
+      } else {
+        alert("Please upload a valid Excel file.");
+      }
+    };
+    function GetTableFromExcel(data) {
+      //Read the Excel File data in binary
+      var workbook = XLSX.read(data, {
+        type: 'binary'
+      });
+      //get the name of First Sheet.
+      var Sheet = workbook.SheetNames[0];
+      //Read all rows from First Sheet into an JSON array.
+      var excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[Sheet]);
+      //Create a HTML Table element.
+      var myTable = document.createElement("table");
+      myTable.setAttribute('id', 'intro')
+      myTable.border = "1";
+      //Add the header row.
+      var row = myTable.insertRow(-1);
+      //Add the header cells.
+      var headerCell = document.createElement("TH");
+      headerCell.innerHTML = "Items";
+      row.appendChild(headerCell);
+
+      headerCell = document.createElement("TH");
+      headerCell.innerHTML = "Quantity";
+      row.appendChild(headerCell);
+
+      // headerCell = document.createElement("TH");
+      // headerCell.innerHTML = "Total";
+      // row.appendChild(headerCell);
+
+      // headerCell = document.createElement("TH");
+      // headerCell.innerHTML = "Age";
+      // row.appendChild(headerCell);
+
+      // headerCell = document.createElement("TH");
+      // headerCell.innerHTML = "Date";
+      // row.appendChild(headerCell);
+
+      // headerCell = document.createElement("TH");
+      // headerCell.innerHTML = "Gender";
+      // row.appendChild(headerCell);
+
+
+      var myElement = document.getElementById("intro")
+      // console.log(myTable, "hiha", myElement)
+
+
+      var ExcelTable = document.getElementById("ExcelTable");
+      ExcelTable.innerHTML = "";
+      ExcelTable.appendChild(myTable);
+
+      var tr = document.getElementById("intro").getElementsByTagName("tr")
+      // console.log(myTable, "hiha", tr)
+
+      // console.log(tr[0].getElementsByTagName("th")[0])
+
+      let arr = []
+      //Add the data rows from Excel file.
+      for (var i = 0; i < excelRows.length; i++) {
+
+
+        let x = excelRows[i].Items
+        // console.log(x)
+
+        let found = arr.find(function (elm) { return x == elm })
+        // console.log(`found = ${found} for i = ${i}`);
+
+        if (found != undefined) {
+          var myElement = document.getElementById("intro").getElementsByTagName("tr")
+          console.log("found similarity")
+          a = arr.indexOf(excelRows[i].Items)
+          console.log(`for a[${a}] = ${x}, i = ${i}, item = ${excelRows[i].Items}`)
+          j = parseInt(excelRows[a].Quantity)
+          // k = parseInt(excelRows[a].Total)
+          // y = (myElement[a + 1].getElementsByTagName("td")[0])
+          // console.log(excelRows[a].Total, excelRows[i].Quantity)
+          // excelRows[a].Total = (parseInt(excelRows[a].Total) + parseInt(excelRows[i].Quantity))
+          // console.log(excelRows[a].Total)
+          // console.log(j)
+          // k = parseInt(k) + parseInt(excelRows[i].Quantity)
+          // k += parseInt(excelRows[i].Quantity)
+          j += excelRows[i].Quantity
+          // console.log(j)
+
+          // console.log(myElement)
+          // console.log(myElement[1], myElement[2])
+          myElement[a + 1].getElementsByTagName("td")[1].innerHTML = j
+          // myElement[a + 1].getElementsByTagName("td")[2].innerHTML = k
+
+          // console.log(` a = ${a}, excelRows[a + 1].Id = ${excelRows[a + 1].Id} `)
+          excelRows[a].Quantity = j;
+          // excelRows[a].Total = k;
+          // console.log(` a = ${a}, excelRows[a + 1].Id = ${excelRows[a + 1].Id} `)
+
+
+
+        } else {
+          arr.push(x)
+          found = 0
+
+          //Add the data row.
+          var row = myTable.insertRow(-1);
+
+          //Add the data cells.
+          var cell = row.insertCell(-1);
+          cell.innerHTML = excelRows[i].Items;
+
+          cell = row.insertCell(-1);
+          cell.innerHTML = excelRows[i].Quantity;
+
+          // cell = row.insertCell(-1);
+          // cell.innerHTML = excelRows[i].Quantity;
+
+
+          // cell = row.insertCell(-1);
+          // cell.innerHTML = excelRows[i].Age;
+
+          // cell = row.insertCell(-1);
+          // cell.innerHTML = excelRows[i].Date;
+
+          // cell = row.insertCell(-1);
+          // cell.innerHTML = excelRows[i].Gender;
+
+        }
+      }
+    }
+  </script>
